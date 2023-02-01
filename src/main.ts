@@ -10,20 +10,12 @@ interface VetEntry {
   }
 }
 
-interface Annotation {
-  path: string
-  start_line: number
-  end_line: number
-  start_column?: number
-  end_column?: number
-  annotation_level: string
-  message: string
-  title?: string
-  raw_details?: string
-}
-
 async function run(): Promise<void> {
   try {
+    const packages = core.getInput('packages', {required: false})
+    const buildFlags = core.getInput('build-flags', {required: false})
+    const vetFlags = core.getInput('vet-flags', {required: false})
+
     let vetError = ''
 
     const options: exec.ExecOptions = {
@@ -35,7 +27,11 @@ async function run(): Promise<void> {
       cwd: './'
     }
 
-    await exec.exec('go', ['vet', '-json', './...'], options)
+    await exec.exec(
+      'go',
+      ['vet', buildFlags, '-json', vetFlags, packages],
+      options
+    )
 
     let buf = ''
     const arr: VetEntry[] = []
@@ -55,8 +51,6 @@ async function run(): Promise<void> {
       buf = ''
     }
 
-    const annotations: Annotation[] = []
-
     const trimLen = process.cwd().length + 1
 
     for (const entry of arr) {
@@ -64,29 +58,18 @@ async function run(): Promise<void> {
         for (const rule in entry[pkg]) {
           for (const err of entry[pkg][rule]) {
             const [full_path, line, col] = err.posn.split(':')
-            annotations.push({
-              annotation_level: 'warning',
-              path: full_path.substring(trimLen),
-              start_line: parseInt(line),
-              end_line: parseInt(line),
-              start_column: parseInt(col),
-              message: err.message,
-              title: rule
-            })
 
             core.warning(err.message, {
               startColumn: parseInt(col),
               startLine: parseInt(line),
               endLine: parseInt(line),
               file: full_path.substring(trimLen),
-              title: rule
+              title: `[vet] ${rule}`
             })
           }
         }
       }
     }
-    console.log(process.cwd())
-    console.log(JSON.stringify(annotations, null, '  '))
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

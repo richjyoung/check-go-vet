@@ -40,6 +40,9 @@ const exec = __importStar(__nccwpck_require__(514));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const packages = core.getInput('packages', { required: false });
+            const buildFlags = core.getInput('build-flags', { required: false });
+            const vetFlags = core.getInput('vet-flags', { required: false });
             let vetError = '';
             const options = {
                 listeners: {
@@ -49,7 +52,7 @@ function run() {
                 },
                 cwd: './'
             };
-            yield exec.exec('go', ['vet', '-json', './...'], options);
+            yield exec.exec('go', ['vet', buildFlags, '-json', vetFlags, packages], options);
             let buf = '';
             const arr = [];
             for (const line of vetError.split('\n')) {
@@ -67,35 +70,23 @@ function run() {
                 arr.push(JSON.parse(buf));
                 buf = '';
             }
-            const annotations = [];
             const trimLen = process.cwd().length + 1;
             for (const entry of arr) {
                 for (const pkg in entry) {
                     for (const rule in entry[pkg]) {
                         for (const err of entry[pkg][rule]) {
                             const [full_path, line, col] = err.posn.split(':');
-                            annotations.push({
-                                annotation_level: 'warning',
-                                path: full_path.substring(trimLen),
-                                start_line: parseInt(line),
-                                end_line: parseInt(line),
-                                start_column: parseInt(col),
-                                message: err.message,
-                                title: rule
-                            });
                             core.warning(err.message, {
                                 startColumn: parseInt(col),
                                 startLine: parseInt(line),
                                 endLine: parseInt(line),
                                 file: full_path.substring(trimLen),
-                                title: rule
+                                title: `[vet] ${rule}`
                             });
                         }
                     }
                 }
             }
-            console.log(process.cwd());
-            console.log(JSON.stringify(annotations, null, '  '));
         }
         catch (error) {
             if (error instanceof Error)
