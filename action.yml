@@ -1,11 +1,16 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'richjyoung'
+description: 'Check Go Vet'
+author: 'richjyoung'
 inputs:
-  milliseconds: # change this
-    required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  packages:
+    description: 'List of packages'
+    default: './...'
+  build-flags:
+    description: Build flags passed to vet
+    default: ''
+  vet-flags:
+    description: Build flags passed to vet
+    default: ''
 runs:
   using: 'node16'
   main: 'dist/index.js'
