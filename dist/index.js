@@ -52,7 +52,7 @@ function run() {
                 },
                 cwd: './'
             };
-            yield exec.exec('go', [
+            const retval = yield exec.exec('go', [
                 'vet',
                 ...buildFlags.split(' ').filter(x => !!x),
                 '-json',
@@ -77,6 +77,7 @@ function run() {
                 buf = '';
             }
             const trimLen = process.cwd().length + 1;
+            let count = 0;
             for (const entry of arr) {
                 for (const pkg in entry) {
                     for (const rule in entry[pkg]) {
@@ -92,6 +93,9 @@ function run() {
                         }
                     }
                 }
+            }
+            if (retval !== 0) {
+                core.setFailed(`go vet failed with ${count} warnings`);
             }
         }
         catch (error) {
