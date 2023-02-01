@@ -94,8 +94,8 @@ function run() {
                     }
                 }
             }
-            if (retval !== 0) {
-                core.setFailed(`go vet failed with ${count} warnings`);
+            if (retval !== 0 || count > 0) {
+                core.setFailed(`go vet returned code ${retval}, ${count} warnings`);
             }
         }
         catch (error) {

@@ -79,8 +79,8 @@ async function run(): Promise<void> {
       }
     }
 
-    if (retval !== 0) {
-      core.setFailed(`go vet failed with ${count} warnings`)
+    if (retval !== 0 || count > 0) {
+      core.setFailed(`go vet returned code ${retval}, ${count} warnings`)
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
