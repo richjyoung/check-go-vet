@@ -83,6 +83,13 @@ function run() {
                                 message: err.message,
                                 title: rule
                             });
+                            core.warning(err.message, {
+                                startColumn: parseInt(col),
+                                startLine: parseInt(line),
+                                endLine: parseInt(line),
+                                file: full_path.substring(trimLen),
+                                title: rule
+                            });
                         }
                     }
                 }
