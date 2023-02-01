@@ -74,6 +74,8 @@ async function run(): Promise<void> {
               file: full_path.substring(trimLen),
               title: `[vet] ${rule}`
             })
+
+            count++
           }
         }
       }

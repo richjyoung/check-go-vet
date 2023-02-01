@@ -90,6 +90,7 @@ function run() {
                                 file: full_path.substring(trimLen),
                                 title: `[vet] ${rule}`
                             });
+                            count++;
                         }
                     }
                 }
