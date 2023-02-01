@@ -52,7 +52,13 @@ function run() {
                 },
                 cwd: './'
             };
-            yield exec.exec('go', ['vet', buildFlags, '-json', vetFlags, packages], options);
+            yield exec.exec('go', [
+                'vet',
+                ...buildFlags.split(' ').filter(x => !!x),
+                '-json',
+                ...vetFlags.split(' ').filter(x => !!x),
+                packages
+            ], options);
             let buf = '';
             const arr = [];
             for (const line of vetError.split('\n')) {

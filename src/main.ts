@@ -29,7 +29,13 @@ async function run(): Promise<void> {
 
     await exec.exec(
       'go',
-      ['vet', buildFlags, '-json', vetFlags, packages],
+      [
+        'vet',
+        ...buildFlags.split(' ').filter(x => !!x),
+        '-json',
+        ...vetFlags.split(' ').filter(x => !!x),
+        packages
+      ],
       options
     )
 
